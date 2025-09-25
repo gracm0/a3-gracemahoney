@@ -31,7 +31,7 @@
       <div id="loginError" style="color:red;"></div>
       <script>
         const params = new URLSearchParams(window.location.search);
-        const err = params.get('error');
+        const err = params.get('error') || ""; // default to empty string
         if (err) document.getElementById('loginError').textContent = err;
       </script>
 
