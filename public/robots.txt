@@ -1,0 +1,4 @@
+# robots.txt for A3 project
+# Allow all crawlers
+User-agent: *
+Disallow:
