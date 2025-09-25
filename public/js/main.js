@@ -1,4 +1,21 @@
+function displayUserEmail() {
+  fetch("/me", { credentials: "same-origin" }) // ensures cookies are sent
+    .then(res => res.json())
+    .then(data => {
+      const emailDiv = document.getElementById("userEmail");
+      if (data.email) {
+        emailDiv.textContent = "Signed in: " + data.email;
+      } else {
+        emailDiv.textContent = "Not signed in";
+      }
+    })
+    .catch(err => console.error("Failed to fetch user email:", err));
+}
+
+// Run on page load
 window.onload = function () {
+  displayUserEmail();
+
   const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0,10);
   const lastDay = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().slice(0,10);
 
@@ -7,6 +24,7 @@ window.onload = function () {
 
   loadTransactions(firstDay, lastDay);
 };
+
 
 function loadTransactions(firstDate, lastDate) {
   fetch("/read", {

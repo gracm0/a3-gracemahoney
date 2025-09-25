@@ -12,22 +12,26 @@
   <header>
     <h1>Mahoney's Money Tracker</h1>
     <nav>
+      <div id="userEmail" style="margin-bottom: 5px;">Not signed in</div>
       <a href="/logout">Sign out</a>
-      <button onclick="addItem()">Add Item</button> <!-- Top button -->
+      <button onclick="addItem()">Add Item</button>
     </nav>
   </header>
 
-  <div id="statsGrid" style="display: flex; gap: 10px; margin-bottom: 20px;"></div>
-
-  <section id="filters">
+  <section id="filters" style="display: flex; align-items: center; gap: 10px; margin: 20px 0;">
     <label for="startDateInput">Start Date:</label>
-    <input id="startDateInput" name="startDate" type="text" placeholder="Select start date">
+    <input id="startDateInput" name="startDate" type="text" placeholder="YYYY-MM-DD">
 
     <label for="endDateInput">End Date:</label>
-    <input id="endDateInput" name="endDate" type="text" placeholder="Select end date">
+    <input id="endDateInput" name="endDate" type="text" placeholder="YYYY-MM-DD">
 
     <button type="button" onclick="updateContent()">Enter Date</button>
     <button type="button" onclick="viewAllDates()">All Dates</button>
+  </section>
+
+  <section id="statsSection">
+    <h2>Statistics</h2>
+    <div id="statsGrid" style="display: flex; justify-content: center; gap: 10px;"></div>
   </section>
 
   <section>

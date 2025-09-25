@@ -37,8 +37,17 @@ connectDB();
 app.use(cookieSession({
   name: 'session',
   keys: ["superSecretKey"],
-  maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+  sameSite: "lax" // ensures cookie is sent on normal navigation
 }));
+
+app.get("/me", (req, res) => {
+  if (req.session && req.session.email) {
+    res.json({ email: req.session.email });
+  } else {
+    res.json({ email: null });
+  }
+});
 
 // Login and join pages
 app.get("/login", (req, res) => res.sendFile(path.join(__dirname, "/public/login.html")));
@@ -78,6 +87,7 @@ app.post("/join", (req, res) => {
     });
   });
 });
+
 
 // Protect routes
 app.use((req, res, next) => req.session.login ? next() : res.redirect("/login"));
