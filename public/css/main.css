@@ -1,8 +1,8 @@
-#expenses_table {
-  width: 100%;
-  table-layout: auto; /* allow columns to expand */
+.signout-link {
+  color: #0a58ca;       /* accessible blue */
+  text-decoration: none; /* optional: removes underline */
 }
-#expenses_table th, #expenses_table td {
-  padding: 8px;
-  text-align: left;
+.signout-link:hover {
+  color: #084298;       /* darker on hover */
+  text-decoration: underline;
 }
