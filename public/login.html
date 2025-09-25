@@ -27,6 +27,14 @@
       <input id="password" name="password" type="password" required placeholder="Your password">
 
       <button type="submit">Sign in</button>
+
+      <div id="loginError" style="color:red;"></div>
+      <script>
+        const params = new URLSearchParams(window.location.search);
+        const err = params.get('error');
+        if (err) document.getElementById('loginError').textContent = err;
+      </script>
+
     </form>
   </main>
 </body>

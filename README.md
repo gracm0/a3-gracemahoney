@@ -21,6 +21,8 @@ Include a very brief summary of your project here. Images are encouraged, along 
 
 I used Railway. Difficulty navigating - could not figure out how to change visibility and could not find url for a solid 20 min.
 
+100 lighthouse - honestly probably took an hour to fix the constrast issue with my links. I changed the color to every possible combination, even asking chatgpt for colors that should pass and nothing worked. Eventually I read further and changed the font weight, which ended up working even without a color change. I am very upset, but I will survive.
+
 ### Design/Evaluation Achievements
 - **Design Achievement 1**: I followed the following tips from the W3C Web Accessibility Initiative...
 

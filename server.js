@@ -55,18 +55,26 @@ app.get("/join", (req, res) => res.sendFile(path.join(__dirname, "/public/join.h
 
 // Authentication
 app.post("/login", (req, res) => {
-  users.findOne({ email: req.body.email }).then(user => {
-    if (!user) return res.redirect("/login");
-    bcrypt.compare(req.body.password, user.password).then(match => {
-      if (match) {
-        req.session.login = true;
-        req.session.email = req.body.email;
-        res.redirect("/");
-      } else {
-        res.redirect("/login");
+  users.findOne({ email: req.body.email })
+    .then(user => {
+      if (!user) {
+        return res.redirect("/login?error=User not found");
       }
+      bcrypt.compare(req.body.password, user.password)
+        .then(match => {
+          if (match) {
+            req.session.login = true;
+            req.session.email = req.body.email;
+            res.redirect("/");
+          } else {
+            return res.redirect("/login?error=Incorrect password");
+          }
+        });
+    })
+    .catch(err => {
+      console.error(err);
+      res.redirect("/login?error=Server error");
     });
-  }).catch(() => res.redirect("/login"));
 });
 
 app.get("/logout", (req, res) => {
