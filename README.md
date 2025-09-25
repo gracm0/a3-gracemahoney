@@ -5,7 +5,7 @@ Due: Monday, September 22, 2025, by 11:59 PM.
 Grace Mahoney
 
 ## Expense Tracker
-https://a3-gracemahoney.onrender.com
+a3-gracemahoney-production.up.railway.app
 
 Include a very brief summary of your project here. Images are encouraged, along with concise, high-level text. Be sure to include:
 
@@ -18,6 +18,8 @@ Include a very brief summary of your project here. Images are encouraged, along 
 
 ## Technical Achievements
 - **Tech Achievement 1**: I used OAuth authentication via the GitHub strategy
+
+I used Railway. Difficulty navigating - could not figure out how to change visibility and could not find url for a solid 20 min.
 
 ### Design/Evaluation Achievements
 - **Design Achievement 1**: I followed the following tips from the W3C Web Accessibility Initiative...

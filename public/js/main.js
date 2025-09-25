@@ -113,7 +113,7 @@ function renderTable(transactions) {
       typeCell.style.color = "green";
       totalIncome += tr.amount;
     } else {
-      typeCell.style.color = "red";
+      typeCell.style.color = "#b71c1c"; // dark red - sufficient contrast
       totalExpense += tr.amount;
     }
     typeCell.style.fontWeight = "bold";
