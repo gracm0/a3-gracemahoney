@@ -1,8 +1,0 @@
-.signout-link {
-  color: #0a58ca !important;       /* accessible blue */
-  text-decoration: none; /* optional: removes underline */
-}
-.signout-link:hover {
-  color: #084298 !important;       /* darker on hover */
-  text-decoration: underline;
-}
