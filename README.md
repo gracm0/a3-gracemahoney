@@ -57,9 +57,10 @@ All elements are aligned using a structured grid layout provided by the CSS fram
 #### Proximity:
 Proximity was used to group related items together and separate unrelated content to improve comprehension and usability. Expense details such as date, category, and amount are grouped within the same card to indicate they belong together, while actions such as “Edit” and “Delete” are positioned near each card to maintain context. Navigation links, login fields, and error messages are similarly grouped in logical sections, with spacing between unrelated content to reduce cognitive load. This clear grouping helps users quickly understand which items are connected and which are distinct, making the interface intuitive and minimizing the chance of user errors. Proper use of proximity also enhances the visual flow and overall readability of the site.
 
-[Join Page](./join.png)
-[Login Page](./login.png)
-[Expense Dashboard](./dashboard.png)
+### App Screenshots
+![Join Page](./join.png)
+![Login Page](./login.png)
+![Expense Dashboard](./dashboard.png)
 
 
 
