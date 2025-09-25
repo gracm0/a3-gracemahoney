@@ -5,72 +5,76 @@ window.onload = function () {
   document.getElementById("startDateInput").value = firstDay;
   document.getElementById("endDateInput").value = lastDay;
 
-  pageLoad(firstDay, lastDay);
+  loadTransactions(firstDay, lastDay);
 };
 
-function pageLoad(firstDate, lastDate) {
-  const container = document.getElementById("cards");
-  container.innerHTML = "";
-  const statsGrid = document.getElementById("statsGrid");
-  statsGrid.innerHTML = "";
-
+function loadTransactions(firstDate, lastDate) {
   fetch("/read", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ firstDate, lastDate })
   })
   .then(res => res.json())
-  .then(res => {
-    if (res.length === 0) {
-      container.innerHTML = `<div style="text-align:center; padding:20px;">No items for current filter<br><button onclick="addItem()">Add Item</button></div>`;
-      return;
-    }
-
-    // Aggregate totals
-    let totalIncome = 0, totalExpense = 0;
-    const days = {};
-
-    res.forEach(tr => {
-      if (!days[tr.date]) days[tr.date] = [];
-      days[tr.date].push(tr);
-      tr.isIncome ? totalIncome += tr.amount : totalExpense += tr.amount;
-    });
-
-    // Display stats
-    const incomeCard = document.createElement("div");
-    incomeCard.className = "card income-card";
-    incomeCard.innerHTML = `<div>Income: $${(totalIncome/100).toFixed(2)}</div>`;
-    statsGrid.appendChild(incomeCard);
-
-    const expenseCard = document.createElement("div");
-    expenseCard.className = "card expenses-card";
-    expenseCard.innerHTML = `<div>Expenses: $${(totalExpense/100).toFixed(2)}</div>`;
-    statsGrid.appendChild(expenseCard);
-
-    // Display each day's transactions
-    Object.keys(days).sort((a,b) => b.localeCompare(a)).forEach(date => {
-      createCard({ date, transactions: days[date] });
-    });
-  });
+  .then(transactions => renderTable(transactions));
 }
 
-function createCard(day) {
-  const container = document.getElementById("cards");
-  const card = document.createElement("div");
-  card.className = "card";
-  card.style.marginBottom = "10px";
+function renderTable(transactions) {
+  const tbody = document.querySelector("#expenses_table tbody");
+  tbody.innerHTML = "";
 
-  const dateDiv = document.createElement("div");
-  dateDiv.innerHTML = `<strong>${day.date}</strong>`;
-  card.appendChild(dateDiv);
+  let totalIncome = 0, totalExpense = 0;
 
-  day.transactions.forEach(tr => {
-    const trDiv = document.createElement("div");
-    trDiv.innerHTML = `${tr.isIncome ? '+' : '-'} $${(tr.amount/100).toFixed(2)} - ${tr.note}`;
-    card.appendChild(trDiv);
+  transactions.forEach((tr, i) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${tr.note}</td>
+      <td>${(tr.amount/100).toFixed(2)}</td>
+      <td>${tr.date}</td>
+      <td>${tr.isIncome ? "Income" : "Expense"}</td>
+      <td><button class="delete-btn">Delete</button></td>
+    `;
+
+    // Color-code the type
+    const typeCell = row.querySelector("td:nth-child(4)");
+    if (tr.isIncome) {
+      typeCell.style.color = "green";
+      totalIncome += tr.amount;
+    } else {
+      typeCell.style.color = "red";
+      totalExpense += tr.amount;
+    }
+    typeCell.style.fontWeight = "bold";
+
+    // Delete button
+    row.querySelector(".delete-btn").onclick = () => {
+      fetch("/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: tr._id })
+      }).then(() => {
+        // Reload table after deletion
+        const startDate = document.getElementById('startDateInput').value;
+        const endDate = document.getElementById('endDateInput').value;
+        loadTransactions(startDate, endDate);
+      });
+    };
+
+    tbody.appendChild(row);
   });
 
-  container.appendChild(card);
+  // Update stats cards
+  const statsGrid = document.getElementById("statsGrid");
+  statsGrid.innerHTML = "";
+
+  const incomeCard = document.createElement("div");
+  incomeCard.className = "card income-card";
+  incomeCard.innerHTML = `<div>Income: $${(totalIncome/100).toFixed(2)}</div>`;
+  statsGrid.appendChild(incomeCard);
+
+  const expenseCard = document.createElement("div");
+  expenseCard.className = "card expenses-card";
+  expenseCard.innerHTML = `<div>Expenses: $${(totalExpense/100).toFixed(2)}</div>`;
+  statsGrid.appendChild(expenseCard);
 }
 
 function addItem() {
@@ -86,39 +90,30 @@ function addItem() {
   const note = prompt("Enter note:", "");
   if (note === null) return;
 
-  const transaction = { date, type, amount, note };
-
   fetch("/create", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(transaction)
+    body: JSON.stringify({ date, type, amount, note })
   })
   .then(res => res.json())
   .then(data => {
     if (data.success) {
-      console.log("Transaction added:", data.insertedId);
-
-      // Reload current date range to display new transaction
+      // reload table with current filters
       const startDate = document.getElementById('startDateInput').value;
       const endDate = document.getElementById('endDateInput').value;
-      pageLoad(startDate, endDate);
+      loadTransactions(startDate, endDate);
     } else {
-      console.error("Failed to add transaction:", data.error);
       alert("Failed to add transaction: " + data.error);
     }
-  })
-  .catch(err => {
-    console.error("Error adding transaction:", err);
-    alert("Error adding transaction: see console");
   });
 }
 
 function updateContent() {
   const startDate = document.getElementById('startDateInput').value;
   const endDate = document.getElementById('endDateInput').value;
-  pageLoad(startDate, endDate);
+  loadTransactions(startDate, endDate);
 }
 
 function viewAllDates() {
-  pageLoad("0000-00-00", "9999-99-99");
+  loadTransactions("0000-00-00", "9999-99-99");
 }
