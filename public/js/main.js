@@ -140,6 +140,11 @@ function renderTable(transactions) {
   expenseCard.className = "card expenses-card";
   expenseCard.innerHTML = `<div>Expenses: $${(totalExpense/100).toFixed(2)}</div>`;
   statsGrid.appendChild(expenseCard);
+
+  const netCard = document.createElement("div");
+  netCard.className = "card net-card";
+  netCard.innerHTML = `<div>Net Total: $${((totalIncome/100)-(totalExpense/100)).toFixed(2)}</div>`;
+  statsGrid.appendChild(netCard);
 }
 
 function addItem() {
