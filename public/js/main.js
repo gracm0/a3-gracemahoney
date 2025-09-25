@@ -1,99 +1,124 @@
-// FRONT-END (CLIENT) JAVASCRIPT HERE
-
-let loadTimes = [];
-let loadTimeTotal = 0;
-
 window.onload = function () {
-	const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toLocaleDateString("en-CA");
-	const lastDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toLocaleDateString("en-CA");
+  const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0,10);
+  const lastDay = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().slice(0,10);
 
-	document.getElementById("startDateInput").value = firstDayOfMonth;
-	document.getElementById("endDateInput").value = lastDayOfMonth;
+  document.getElementById("startDateInput").value = firstDay;
+  document.getElementById("endDateInput").value = lastDay;
 
-	pageLoad(firstDayOfMonth, lastDayOfMonth);
-}
+  pageLoad(firstDay, lastDay);
+};
 
 function pageLoad(firstDate, lastDate) {
-	const start = new Date().getTime();
+  const container = document.getElementById("cards");
+  container.innerHTML = "";
+  const statsGrid = document.getElementById("statsGrid");
+  statsGrid.innerHTML = "";
 
-	// Clear old stats
-	if (document.getElementById("incomeCard")) document.getElementById("statsGrid").removeChild(document.getElementById("incomeCard"));
-	if (document.getElementById("expensesCard")) document.getElementById("statsGrid").removeChild(document.getElementById("expensesCard"));
+  fetch("/read", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ firstDate, lastDate })
+  })
+  .then(res => res.json())
+  .then(res => {
+    if (res.length === 0) {
+      container.innerHTML = `<div style="text-align:center; padding:20px;">No items for current filter<br><button onclick="addItem()">Add Item</button></div>`;
+      return;
+    }
 
-	document.getElementById("cards").innerHTML = "";
+    // Aggregate totals
+    let totalIncome = 0, totalExpense = 0;
+    const days = {};
 
-	if (document.getElementById("loader")) document.body.removeChild(document.getElementById("loader"));
+    res.forEach(tr => {
+      if (!days[tr.date]) days[tr.date] = [];
+      days[tr.date].push(tr);
+      tr.isIncome ? totalIncome += tr.amount : totalExpense += tr.amount;
+    });
 
-	const loader = document.createElement('div');
-	loader.id = "loader";
-	loader.innerHTML = `<div style="height: 60vh" class="loader">Loading...</div>`; // simple loader, style in CSS
-	document.body.insertBefore(loader, document.getElementById('cards'));
+    // Display stats
+    const incomeCard = document.createElement("div");
+    incomeCard.className = "card income-card";
+    incomeCard.innerHTML = `<div>Income: $${(totalIncome/100).toFixed(2)}</div>`;
+    statsGrid.appendChild(incomeCard);
 
-	let body = { firstDate, lastDate };
+    const expenseCard = document.createElement("div");
+    expenseCard.className = "card expenses-card";
+    expenseCard.innerHTML = `<div>Expenses: $${(totalExpense/100).toFixed(2)}</div>`;
+    statsGrid.appendChild(expenseCard);
 
-	fetch("/read", {
-		method: "POST",
-		headers: {"Content-Type": "application/json"},
-		body: JSON.stringify(body)
-	})
-	.then(res => res.json())
-	.then(res => {
-		if (res.length === 0) {
-			document.getElementById("loader").innerHTML = `<div style="height: 60vh; text-align:center; padding-top: 10vh;">No items for current filter<br><button onclick="addItem()">Add Item</button></div>`;
-			const end = new Date().getTime();
-			loadTimes.push(end - start);
-			loadTimeTotal += (end - start);
-			return;
-		}
+    // Display each day's transactions
+    Object.keys(days).sort((a,b) => b.localeCompare(a)).forEach(date => {
+      createCard({ date, transactions: days[date] });
+    });
+  });
+}
 
-		let jsons = [];
-		jsons[0] = { date: res[0].date, I: 0, O: 0, transactions: [] };
-		if (res[0].isIncome) jsons[0].I += res[0].amount;
-		else jsons[0].O += res[0].amount;
-		jsons[0].transactions.push({ id: res[0]._id, date: res[0].date, isIncome: res[0].isIncome, amount: res[0].amount, note: res[0].note });
+function createCard(day) {
+  const container = document.getElementById("cards");
+  const card = document.createElement("div");
+  card.className = "card";
+  card.style.marginBottom = "10px";
 
-		for (let i = 1; i < res.length; i++) {
-			if (res[i].date !== jsons[jsons.length - 1].date) {
-				jsons.push({ date: res[i].date, I: 0, O: 0, transactions: [] });
-			}
-			if (res[i].isIncome) jsons[jsons.length - 1].I += res[i].amount;
-			else jsons[jsons.length - 1].O += res[i].amount;
-			jsons[jsons.length - 1].transactions.push({ id: res[i]._id, date: res[i].date, isIncome: res[i].isIncome, amount: res[i].amount, note: res[i].note });
-		}
+  const dateDiv = document.createElement("div");
+  dateDiv.innerHTML = `<strong>${day.date}</strong>`;
+  card.appendChild(dateDiv);
 
-		let I = 0, O = 0;
-		jsons.forEach(day => { I += day.I; O += day.O; });
+  day.transactions.forEach(tr => {
+    const trDiv = document.createElement("div");
+    trDiv.innerHTML = `${tr.isIncome ? '+' : '-'} $${(tr.amount/100).toFixed(2)} - ${tr.note}`;
+    card.appendChild(trDiv);
+  });
 
-		let prevI = 23945;
-		let prevO = 83456;
+  container.appendChild(card);
+}
 
-		const incomeCard = document.createElement("div");
-		incomeCard.id = "incomeCard";
-		incomeCard.className = "card income-card";
-		incomeCard.innerHTML = `<div>Income: $${(I/100).toFixed(0)} (from $${(prevI/100).toFixed(0)})</div>`;
+function addItem() {
+  const date = prompt("Enter date (YYYY-MM-DD):", new Date().toISOString().slice(0, 10));
+  if (!date) return;
 
-		const expensesCard = document.createElement("div");
-		expensesCard.id = "expensesCard";
-		expensesCard.className = "card expenses-card";
-		expensesCard.innerHTML = `<div>Expenses: $${(O/100).toFixed(0)} (from $${(prevO/100).toFixed(0)})</div>`;
+  const type = prompt("Enter type (income/expense):", "expense");
+  if (!type) return;
 
-		document.getElementById("statsGrid").appendChild(incomeCard);
-		document.getElementById("statsGrid").appendChild(expensesCard);
+  const amount = prompt("Enter amount in dollars:", "0");
+  if (!amount) return;
 
-		jsons.forEach(day => createCard(day));
+  const note = prompt("Enter note:", "");
+  if (note === null) return;
 
-		document.body.removeChild(document.getElementById("loader"));
+  const transaction = { date, type, amount, note };
 
-		const end = new Date().getTime();
-		loadTimes.push(end - start);
-		loadTimeTotal += (end - start);
-	});
+  fetch("/create", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(transaction)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      console.log("Transaction added:", data.insertedId);
+
+      // Reload current date range to display new transaction
+      const startDate = document.getElementById('startDateInput').value;
+      const endDate = document.getElementById('endDateInput').value;
+      pageLoad(startDate, endDate);
+    } else {
+      console.error("Failed to add transaction:", data.error);
+      alert("Failed to add transaction: " + data.error);
+    }
+  })
+  .catch(err => {
+    console.error("Error adding transaction:", err);
+    alert("Error adding transaction: see console");
+  });
 }
 
 function updateContent() {
-	const startDate = document.getElementById('startDateInput').value;
-	const endDate = document.getElementById('endDateInput').value;
-	if (startDate && endDate) pageLoad(startDate, endDate);
+  const startDate = document.getElementById('startDateInput').value;
+  const endDate = document.getElementById('endDateInput').value;
+  pageLoad(startDate, endDate);
 }
 
-function viewAllDates() { pageLoad("0000-00-00", "9999-99-99"); }
+function viewAllDates() {
+  pageLoad("0000-00-00", "9999-99-99");
+}

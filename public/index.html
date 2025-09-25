@@ -20,7 +20,8 @@
 
   <section>
     <h2>Statistics</h2>
-    <form id="dateForm">
+    <div id="statsGrid" style="display: flex; gap: 10px; margin-bottom: 20px;"></div>
+    <form id="dateForm" style="display: flex; align-items: center; gap: 10px; flex-wrap: nowrap;">
       <label for="startDateInput">Start Date:</label>
       <input id="startDateInput" name="startDate" type="text" placeholder="Select start date">
 
@@ -30,6 +31,7 @@
       <button type="submit" onclick="updateContent()">Enter Date</button>
       <button type="button" onclick="viewAllDates()">All Dates</button>
     </form>
+
   </section>
 
   <section id="cards">

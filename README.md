@@ -24,3 +24,6 @@ Include a very brief summary of your project here. Images are encouraged, along 
 
 
 CSS template: Sakura (https://github.com/oxalorg/sakura?tab=readme-ov-file)
+
+resources:
+https://expressjs.com/en/starter/basic-routing.html
