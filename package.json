@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-session": "^2.1.1",
+    "express": "^5.1.0",
+    "mongodb": "^6.20.0",
+    "normalize.css": "^8.0.1",
+    "sakura.css": "^1.5.1"
+  }
+}

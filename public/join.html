@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mahoney's Money Tracker - Join</title>
+  <meta name="description" content="Register page of Mahoney's Money Tracker">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Sakura CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+</head>
+<body>
+  <main>
+    <h1 style="text-align: center;">Join Mahoney's Money Tracker</h1>
+    <p style="text-align: center;">
+      Already have an account? <a href="/login">Sign in</a>
+    </p>
+
+    <form action="/join" method="POST">
+      <label for="email-address">Email address:</label>
+      <input id="email-address" name="email" type="email" required placeholder="your@email.com">
+
+      <label for="password">Password:</label>
+      <input id="password" name="password" type="password" required placeholder="Your password">
+
+      <label for="passConfd">Confirm Password:</label>
+      <input id="passConfd" name="passConfd" type="password" required placeholder="Confirm password">
+
+      <button type="submit">Join now</button>
+    </form>
+  </main>
+
+  <script>
+    // Password confirmation validation
+    const passwordConfd = document.getElementById("passConfd");
+    const password = document.getElementById("pass");
+
+    function validatePassword() {
+      if (password.value !== passwordConfd.value) {
+        passwordConfd.setCustomValidity("Passwords don't match");
+      } else {
+        passwordConfd.setCustomValidity("");
+      }
+    }
+
+    password.onchange = validatePassword;
+    passwordConfd.onkeyup = validatePassword;
+  </script>
+</body>
+</html>
