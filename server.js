@@ -61,16 +61,14 @@ app.post("/login", (req, res) => {
   console.log("/login");
   console.log(req.body);
 
-  // Find the user by email
   users.findOne({ email: req.body.email })
     .then(user => {
-      if (!user) { // email doesn't exist
+      if (!user) {
         console.log("No such email found");
         return res.redirect("/login"); 
       }
 
-      // Compare hashed password
-      bcrypt.compare(req.body.pass, user.pass)
+      bcrypt.compare(req.body.password, user.password)
         .then(match => {
           if (match) {
             console.log("Successfully logged user in");
@@ -92,7 +90,7 @@ app.post("/login", (req, res) => {
 // logout of account
 app.get("/logout", function (req, res) {
 	req.session = null;
-	console.log("Successfully logged out")
+	console.log("Successfully logged out");
 	res.redirect("/login");
 });
 
@@ -102,7 +100,7 @@ app.post("/join", (req, res) => {
 	console.log(req.body);
 
 	if (req.body.password !== req.body.passConfd) {
-		console.log("Passwords don't match")
+		console.log("Passwords don't match");
 		return res.redirect("/join");
 	}
 
@@ -122,11 +120,7 @@ app.post("/join", (req, res) => {
 					console.log("Successfully created account");
 
 					// --- Indexing for performance ---
-          // Create an index on the "date" field so sorting/filtering by date is fast
           db.collection(req.body.email).createIndex({ date: 1 });
-
-          // Create a text index on the "note" field so users can search transactions by keywords
-          db.collection(req.body.email).createIndex({ note: "text" });
 
 					// Add sample data
           let transactions = [{
@@ -151,7 +145,7 @@ app.post("/join", (req, res) => {
             note: "SAMPLE - Lunch at Hot Table"
           }];
           db.collection(req.body.email).insertMany(transactions)
-          console.log("Sample transactions added")
+          console.log("Sample transactions added");
 
           res.redirect("/login");
 				});
@@ -190,25 +184,16 @@ app.post("/create", (req, res) => {
 	res.redirect("/");
 });
 
-// Route to read transaction
+// Route to read transaction (search removed)
 app.post("/read", (req, res) => {
-	console.log("/read")
-	console.log(req.body)
-	if (req.body.searchKey === null) {
-		db.collection(req.session.email)
-			.find({date: {$gte: req.body.startDate, $lte: req.body.endDate}})
-			.sort({date: -1, amount: -1, note: -1})
-			.limit(2000)
-			.toArray()
-			.then(result => res.json(result));
-	} else {
-		db.collection(req.session.email)
-			.find({$text: {$search: req.body.searchKey}})
-			.sort({score: {$meta: "textScore"}, date: -1, amount: -1, note: -1})
-			.limit(2000)
-			.toArray()
-			.then(result => res.json(result));
-	}
+	console.log("/read");
+	console.log(req.body);
+	db.collection(req.session.email)
+		.find({ date: { $gte: req.body.startDate, $lte: req.body.endDate } })
+		.sort({ date: -1, amount: -1, note: -1 })
+		.limit(2000)
+		.toArray()
+		.then(result => res.json(result));
 });
 
 // Route to update transaction
@@ -216,7 +201,7 @@ app.post("/update", (req, res) => {
 	console.log("/update");
 	console.log(req.body);
 	let transaction = {
-		_id: new mongodb(req.body.id),
+		_id: new mongodb.ObjectId(req.body.id),
 		date: req.body.date,
 		isIncome: req.body.type === "income",
 		amount: req.body.amount * 100,

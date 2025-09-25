@@ -10,14 +10,10 @@ window.onload = function () {
 	document.getElementById("startDateInput").value = firstDayOfMonth;
 	document.getElementById("endDateInput").value = lastDayOfMonth;
 
-	pageLoad(firstDayOfMonth, lastDayOfMonth, null);
-
-	document.getElementById("searchKeyInput").addEventListener("keyup", function (event) {
-		if (event.key === "Enter") searchAllDates();
-	});
+	pageLoad(firstDayOfMonth, lastDayOfMonth);
 }
 
-function pageLoad(firstDate, lastDate, searchKey) {
+function pageLoad(firstDate, lastDate) {
 	const start = new Date().getTime();
 
 	// Clear old stats
@@ -33,12 +29,7 @@ function pageLoad(firstDate, lastDate, searchKey) {
 	loader.innerHTML = `<div style="height: 60vh" class="loader">Loading...</div>`; // simple loader, style in CSS
 	document.body.insertBefore(loader, document.getElementById('cards'));
 
-	let body = {};
-	if (!searchKey) {
-		body = { firstDate, lastDate, searchKey: null };
-	} else {
-		body = { searchKey };
-	}
+	let body = { firstDate, lastDate };
 
 	fetch("/read", {
 		method: "POST",
@@ -102,98 +93,7 @@ function pageLoad(firstDate, lastDate, searchKey) {
 function updateContent() {
 	const startDate = document.getElementById('startDateInput').value;
 	const endDate = document.getElementById('endDateInput').value;
-	if (startDate && endDate) pageLoad(startDate, endDate, null);
+	if (startDate && endDate) pageLoad(startDate, endDate);
 }
 
-function viewAllDates() { pageLoad("0000-00-00", "9999-99-99", null); }
-
-function searchAllDates() {
-	const searchKey = document.getElementById('searchKeyInput').value;
-	if (searchKey) pageLoad(null, null, searchKey);
-}
-
-function tagTo(tag) {
-	document.getElementById("searchKeyInput").value = `"${tag}"`;
-	pageLoad(null, null, `"${tag}"`);
-}
-
-function replaceTag(note) {
-	return note.replace(/#(\S+)/g, value => `<u class="cursor-pointer" onclick="tagTo('${value}')">${value}</u>`);
-}
-
-
-/*
-window.onload = function() {
-  const form = document.querySelector("#expense_form");
-  const resultsContainer = document.querySelector("#result");
-
-  // handle form submission
-  form.onsubmit = async function(event) {
-    event.preventDefault();
-
-    const expense_name = document.querySelector("#expense_name").value;
-    const amount = parseFloat(document.querySelector("#amount").value);
-    const date = document.querySelector("#date").value;
-
-    // send new expense to server
-    const response = await fetch("/add-expense", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ expense_name, amount, date })
-    });
-
-    // update table
-    const updatedExpenses = await response.json();
-    renderExpenses(updatedExpenses);
-
-    form.reset();
-  };
-
-  fetch("/get-expenses")
-    .then(res => res.json())
-    .then(expenses => renderExpenses(expenses));
-}
-
-const renderExpenses = function(expenses) {
-  const tbody = document.querySelector("#expenses_table tbody");
-  tbody.innerHTML = "";
-
-  expenses.forEach((exp, i) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${exp.expense_name}</td>
-      <td>${exp.amount.toFixed(2)}</td>
-      <td>${exp.date}</td>
-      <td>${exp.type}</td>
-      <td><button class="delete-btn">Delete</button></td>
-    `;
-
-    // set color of type based on last cell
-    const lastCell = row.querySelector("td:nth-child(4)");
-    
-    if (exp.type.toLowerCase() === "positive") {
-      lastCell.style.color = "rgb(86, 176, 72)";
-      lastCell.style.fontWeight = "bold";
-    } else if (exp.type.toLowerCase() === "negative") {
-      lastCell.style.color = "rgb(201, 39, 39)"; 
-      lastCell.style.fontWeight = "bold";
-    }
-
-    // DELETE button
-    const deleteBtn = row.querySelector(".delete-btn");
-    deleteBtn.onclick = async function() {
-      const response = await fetch("/delete-expense", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ index: i})
-      });
-
-      // update table
-      const updatedExpenses = await response.json();
-      renderExpenses(updatedExpenses);
-    }
-
-    tbody.appendChild(row);
-  });
-}
-  */
+function viewAllDates() { pageLoad("0000-00-00", "9999-99-99"); }
