@@ -1,0 +1,8 @@
+#expenses_table {
+  width: 100%;
+  table-layout: auto; /* allow columns to expand */
+}
+#expenses_table th, #expenses_table td {
+  padding: 8px;
+  text-align: left;
+}

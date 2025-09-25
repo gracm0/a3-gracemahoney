@@ -36,6 +36,58 @@ function loadTransactions(firstDate, lastDate) {
   .then(transactions => renderTable(transactions));
 }
 
+// delete button functionality
+function deleteTransaction(id) {
+    fetch("/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id })
+    })
+    .then(() => {
+        const startDate = document.getElementById('startDateInput').value;
+        const endDate = document.getElementById('endDateInput').value;
+        loadTransactions(startDate, endDate); // reload table
+    })
+    .catch(err => console.error(err));
+}
+// edit button functionality
+function editTransaction(tr) {
+  const newDate = prompt("Enter date (YYYY-MM-DD):", tr.date);
+  if (!newDate) return;
+
+  const newType = prompt("Enter type (income/expense):", tr.isIncome ? "income" : "expense");
+  if (!newType) return;
+
+  const newAmount = prompt("Enter amount in dollars:", (tr.amount / 100).toFixed(2));
+  if (!newAmount) return;
+
+  const newNote = prompt("Enter note:", tr.note);
+  if (newNote === null) return;
+
+  fetch("/update", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      id: tr._id,
+      date: newDate,
+      type: newType,
+      amount: Number(newAmount),
+      note: newNote
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      const startDate = document.getElementById('startDateInput').value;
+      const endDate = document.getElementById('endDateInput').value;
+      loadTransactions(startDate, endDate);
+    } else {
+      alert("Update failed: " + (data.error || "Unknown error"));
+    }
+  })
+  .catch(err => console.error("Update error:", err));
+}
+
 function renderTable(transactions) {
   const tbody = document.querySelector("#expenses_table tbody");
   tbody.innerHTML = "";
@@ -49,7 +101,10 @@ function renderTable(transactions) {
       <td>${(tr.amount/100).toFixed(2)}</td>
       <td>${tr.date}</td>
       <td>${tr.isIncome ? "Income" : "Expense"}</td>
-      <td><button class="delete-btn">Delete</button></td>
+      <td>
+        <button class="delete-btn">Delete</button>
+        <button class="edit-btn">Edit</button>
+      </td>
     `;
 
     // Color-code the type
@@ -64,18 +119,10 @@ function renderTable(transactions) {
     typeCell.style.fontWeight = "bold";
 
     // Delete button
-    row.querySelector(".delete-btn").onclick = () => {
-      fetch("/delete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: tr._id })
-      }).then(() => {
-        // Reload table after deletion
-        const startDate = document.getElementById('startDateInput').value;
-        const endDate = document.getElementById('endDateInput').value;
-        loadTransactions(startDate, endDate);
-      });
-    };
+    row.querySelector(".delete-btn").onclick = () => deleteTransaction(tr._id);
+
+    // Edit button
+    row.querySelector(".edit-btn").onclick = () => editTransaction(tr);
 
     tbody.appendChild(row);
   });
